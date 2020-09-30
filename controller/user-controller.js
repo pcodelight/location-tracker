@@ -21,15 +21,18 @@ function serverErrorResponse(res) {
  */
 exports.login = async function (req, res) {
     const { username, password } = req.body
-    let user = await User.findOne({ username: username })
+    console.log(req.body)
 
+    let user = await User.findOne({ username: username })
     try {
         if (!user) {
+            console.log("User not found")
             return invalidUserInfo(res)
         }
 
         let isValidPassword = await Bcrypt.compare(password, user.password)
         if (!isValidPassword) {
+            console.log("Invalid password")
             return invalidUserInfo(res)
         }
 
