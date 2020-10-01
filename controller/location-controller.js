@@ -15,7 +15,6 @@ exports.fetchLocations = function (req, res) {
         .exec((err, docResult) => {
             if (!err) {
                 res.status(200).json(docResult)
-                console.log(docResult)
             } else {
                 res.status(500).json({
                     message: err

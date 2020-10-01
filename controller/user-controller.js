@@ -44,7 +44,7 @@ exports.login = async function (req, res) {
             payload,
             process.env.SECRETKEY.toString(),
             {
-                expiresIn: 7200
+                expiresIn: 36000
             },
             (err, token) => {
                 if (err) throw err;
