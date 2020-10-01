@@ -9,11 +9,13 @@ const kinesis = new AWS.Kinesis(config)
  */
 exports.fetchLocations = function (req, res) {
     const { username } = req
+    console.log("[REQ] Get All Locations")
 
     Location.find({ username: username })
         .exec((err, docResult) => {
             if (!err) {
                 res.status(200).json(docResult)
+                console.log(docResult)
             } else {
                 res.status(500).json({
                     message: err
@@ -35,7 +37,15 @@ exports.fetchMonthlyData = function (req, res) {
         { "$group": { "_id": "$month", "count": { "$sum": 1 } } }
     ]).exec((err, docResult) => {
         if (!err) {
-            res.status(200).json(docResult)
+            let filledResult = []
+            for (_month = 1; _month <= 12; _month++) {
+                let dataCount = docResult.find(data => data._id === _month)
+                filledResult.push({
+                    month: _month,
+                    count: dataCount == null ? 0 : dataCount.count
+                })
+            }
+            res.status(200).json(filledResult)
         } else {
             res.status(500).json({
                 message: err
@@ -51,25 +61,28 @@ exports.saveLocation = async function (req, res) {
     try {
         const { username } = req
         const { latitude, longitude, ip_address, timestamp } = req.body
+        console.log("Request Lat: " + latitude + " Lng: " + longitude)
 
         let locationData = Location()
         locationData.username = username
         locationData.latitude = latitude
         locationData.longitude = longitude
         locationData.ip_address = ip_address
-        locationData.timestamp = timestamp
+        locationData.timestamp = JSON.stringify(timestamp)
 
-        let awsNotes = ""
-        sendDataToKinesis(longitude, latitude, ip_address, timestamp, async (err) => {
-            if (err) {
-                awsNotes = err
-                throw "Kinesis can't send data " + err
-            } else {
-                await locationData.save()
-                res.status(200).json(locationData)
-            }
-        })
+        await locationData.save()
+        res.status(200).json(locationData)
 
+        // let awsNotes = ""
+        // sendDataToKinesis(longitude, latitude, ip_address, timestamp, async (err) => {
+        //     if (err) {
+        //         awsNotes = err
+        //         throw "Kinesis can't send data " + err
+        //     } else {
+        //         await locationData.save()
+        //         res.status(200).json(locationData)
+        //     }
+        // })
     } catch (e) {
         console.log(e)
         res.status(500).json({

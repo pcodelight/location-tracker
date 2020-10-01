@@ -21,7 +21,7 @@ function serverErrorResponse(res) {
  */
 exports.login = async function (req, res) {
     const { username, password } = req.body
-    console.log(req.body)
+    console.log("Username : " + username + " Pass: " + password)
 
     let user = await User.findOne({ username: username })
     try {

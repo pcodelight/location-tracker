@@ -1,4 +1,5 @@
 const mongoose = require("mongoose")
+const AutoIncrement = require("mongoose-sequence")(mongoose)
 
 const LocationSchema = mongoose.Schema({
     username: {
@@ -23,4 +24,5 @@ const LocationSchema = mongoose.Schema({
     }
 })
 
+LocationSchema.plugin(AutoIncrement, { inc_field: 'id' })
 module.exports = mongoose.model("location", LocationSchema)
